@@ -23,38 +23,38 @@ def file2matrix(filename):
 
 
 # 画图分析
-def plotDataSet(DataSet, labels):
+def plotDataSet(dataSet, labels):
     plt.figure(figsize=(10, 8))
     plt.rcParams['font.sans-serif'] = ['Microsoft Yahei']
     ax1 = plt.subplot(221)
     for i in range(len(labels)):
         if labels[i] == 1:
-            p1 = ax1.scatter(DataSet[i, 0], DataSet[i, 1], s=2, c='r')
+            p1 = ax1.scatter(dataSet[i, 0], dataSet[i, 1], s=2, c='r')
         elif labels[i] == 2:
-            p2 = ax1.scatter(DataSet[i, 0], DataSet[i, 1], s=2, c='b')
+            p2 = ax1.scatter(dataSet[i, 0], dataSet[i, 1], s=2, c='b')
         else:
-            p3 = ax1.scatter(DataSet[i, 0], DataSet[i, 1], s=2, c='g')
+            p3 = ax1.scatter(dataSet[i, 0], dataSet[i, 1], s=2, c='g')
     plt.xlabel("飞行里程数")
     plt.ylabel("玩游戏时间比")
     plt.legend([p1, p2, p3], ["不喜欢", "喜欢", "非常喜欢"], loc="best", frameon=False)
     ax2 = plt.subplot(222)
     for i in range(len(labels)):
         if labels[i] == 1:
-            p1 = ax2.scatter(DataSet[i, 0], DataSet[i, 2], s=2, c='r')
+            p1 = ax2.scatter(dataSet[i, 0], dataSet[i, 2], s=2, c='r')
         elif labels[i] == 2:
-            p2 = ax2.scatter(DataSet[i, 0], DataSet[i, 2], s=2, c='b')
+            p2 = ax2.scatter(dataSet[i, 0], dataSet[i, 2], s=2, c='b')
         else:
-            p3 = ax2.scatter(DataSet[i, 0], DataSet[i, 2], s=2, c='g')
+            p3 = ax2.scatter(dataSet[i, 0], dataSet[i, 2], s=2, c='g')
     plt.xlabel("飞行里程数")
     plt.ylabel("每周冰淇淋升数")
     ax3 = plt.subplot(223)
     for i in range(len(labels)):
         if labels[i] == 1:
-            p1 = ax3.scatter(DataSet[i, 1], DataSet[i, 2], s=2, c='r')
+            p1 = ax3.scatter(dataSet[i, 1], dataSet[i, 2], s=2, c='r')
         elif labels[i] == 2:
-            p2 = ax3.scatter(DataSet[i, 1], DataSet[i, 2], s=2, c='b')
+            p2 = ax3.scatter(dataSet[i, 1], dataSet[i, 2], s=2, c='b')
         else:
-            p3 = ax3.scatter(DataSet[i, 1], DataSet[i, 2], s=2, c='g')
+            p3 = ax3.scatter(dataSet[i, 1], dataSet[i, 2], s=2, c='g')
     plt.xlabel("玩游戏时间比")
     plt.ylabel("每周冰淇淋升数")
     plt.show()
@@ -71,7 +71,7 @@ def autoNorm(dataSet):
     m = dataSet.shape[0]
     normDataSet = dataSet - np.tile(MinVal, (m, 1))
     normDataSet = normDataSet / np.tile(ranges, (m, 1))
-    return normDataSet, ranges
+    return normDataSet, MinVal, MaxVal
 
 
 def classify(input, dataSet, labels, k):
@@ -93,35 +93,35 @@ def classify(input, dataSet, labels, k):
     return classes
 
 
-def datingClassTest(datingDataMat, datingLabels):
+def datingClassTest(dataSet, labels, k):
     Ratio = 0.1
     # datingDataMat, datingLabels = file2matrix('datingTestSet2.txt')
-    normMat, ranges= autoNorm(datingDataMat)
+    normMat, Minval, MaxVal= autoNorm(dataSet)
     m = normMat.shape[0]
     numTestVecs = int(m * Ratio)
     errorCount = 0
     for i in range(numTestVecs):
-        classiierResult = classify(normMat[i, :], normMat[numTestVecs:m, :], datingLabels[numTestVecs:m], 3)
-        if (classiierResult != datingLabels[i]): errorCount += 1
+        classiierResult = classify(normMat[i, :], normMat[numTestVecs:m, :], labels[numTestVecs:m], k)
+        if (classiierResult != labels[i]): errorCount += 1
     print("预测正确率为%f" % (1 - errorCount / float(numTestVecs)))
 
 
-def classifyPerson(datingDataSet,labels):
+def classifyPerson(dataSet, labels, MinVal, MaxVal, k):
     resultList = ["不喜欢", "喜欢", "非常喜欢"]
-    k = 3
     flyMiles = float(input("请输入飞行里程"))
     percOfVedioGames = float(input("请输入游戏时间占比"))
     iceCream = float(input("请输入每周吃冰淇淋升数"))
-    index = [flyMiles, percOfVedioGames, iceCream]
-    # index = (index - dataSetMin) / (dataSetMax - dataSetMin)
+    person = [flyMiles, percOfVedioGames, iceCream]
+    person = (person - MinVal) / (MaxVal - MinVal)
 
-    ans = classify(index, datingDataSet, labels, k)
+    ans = classify(person, dataSet, labels, k)
     ans = resultList[ans - 1]
     print(ans)
 
 
 if __name__ == "__main__":
+    k = 3
     DataSet, labels = file2matrix("datingTestSet2.txt")
-    normDataSet, ranges= autoNorm(DataSet)
-    classifyPerson(normDataSet, labels)
-    datingClassTest(DataSet, labels)
+    normDataSet, MinVal, MaxVal= autoNorm(DataSet)
+    classifyPerson(normDataSet, labels, MinVal, MaxVal, k)
+    datingClassTest(DataSet, labels, k)

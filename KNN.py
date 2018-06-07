@@ -11,6 +11,7 @@ def createDataSet():
 def classify(input, dataSet, label, k):
     dataSize = dataSet.shape[0]
     # numpy tile()函数:tile(a,b) 将 a 重复 b 次
+    # 计算欧式距离
     diff = tile(input, (dataSize, 1)) - dataSet
     sqdiff = diff ** 2
     # numpy sum()函数:sum()将矩阵所有元素相加, axis=0 将每一列元素相加 压缩成一行, axis=1将每一行元素相加 压缩成一列
