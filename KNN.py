@@ -28,7 +28,7 @@ def classify(input, dataSet, label, k):
         voteLabel = label[sortedDistINdex[i]]
         # dict.get("key", 0) + 1 选取字典key对应的值(若不存在则默认为0)然后+1
         classCount[voteLabel] = classCount.get(voteLabel, 0) + 1
-
+    classes = -1
     maxCount = 0
     for key,value in classCount.items():
         if value > maxCount:
