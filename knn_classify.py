@@ -86,6 +86,7 @@ def classify(input, dataSet, labels, k):
         className = labels[sortDist[i]]
         classCount[className] = classCount.get(className, 0) + 1
     maxCount = 0
+    classes = 0
     for key, value in classCount.items():
         if value > maxCount:
             maxCount = value
