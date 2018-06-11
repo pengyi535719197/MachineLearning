@@ -217,8 +217,8 @@ def createPlot(inTree):
     plt.rcParams['font.sans-serif'] = ['Microsoft Yahei']
     axprops = dict(xticks=[], yticks=[])
     createPlot.ax1 = plt.subplot(111, frameon=False, **axprops)
-    plotTree.totalW = float(getNumLeafs(inTree))
-    plotTree.totalD = float(getTreeDepth(inTree))
+    plotTree.totalW = float(getNumLeafs(inTree))    # 决策树的广度
+    plotTree.totalD = float(getTreeDepth(inTree))   # 决策树的深度
     plotTree.xOff = -0.5/plotTree.totalW
     plotTree.yOff = 1
     plotTree(inTree, (0.5, 1), '')
