@@ -1,5 +1,7 @@
 from math import log
 import operator
+import pickle
+import matplotlib.pyplot as plt
 
 
 def createDataSet():
@@ -87,6 +89,8 @@ def majorityCnt(classList):
         if vote not in classCount.keys():
             classCount[vote] = 0
         classCount[vote] += 1
+    # sort:在本地进行排序,不返回副本  sorted:返回副本,原始输入不变
+    # operator.itemgetter(n) 获取第n个位置的元素
     sortedClassCount = sorted(classCount.items(), key=operator.itemgetter(1), reverse=True)
     return sortedClassCount
 
@@ -143,25 +147,30 @@ def getTreeDepth(myTree):
 # 绘制节点
 '''
     nodeTxt - 节点名
-    centerPt - 文本位置
-    parentPt - 标注箭头的位置
+    centerPt - 文本中心点
+    parentPt - 标注箭头的位置(指向文本的点)
     nodeType - 节点格式
 '''
 
 
 def plotNode(nodeTxt, centerPt, parentPt, nodeType):
-    pass
+    arrow_args = dict(arrowstyle='<-')
+    createPlot.ax1.annotate(nodeTxt, xy=parentPt,
+                            xytext=centerPt, va='center',ha='center',
+                            bbox=nodeType, arrowprops=arrow_args)
 
 
-# 标注有向边属性值
+# 标注有向边属性值(父节点和子节点的中间信息)
+# 矢量边的文本标注
 '''
     cntrPt, parentPt - 用于计算标注位置
     txtString - 标注内容
 '''
+def plotMidText(cntrPt, parentPt, txtString):
+    xMid = (cntrPt[0] + parentPt[0])/2
+    yMid = (cntrPt[1] + parentPt[1])/2
+    createPlot.ax1.text(xMid, yMid, txtString, va='center', ha='center', rotation=30)
 
-
-def plotMidText(cntrPt, parentPt, txtStrng):
-    pass
 
 
 # 绘制决策树
@@ -173,7 +182,27 @@ def plotMidText(cntrPt, parentPt, txtStrng):
 
 
 def plotTree(myTree, parentPt, nodeTxt):
-    pass
+    decisionNode = dict(boxstyle='sawtooth', fc='0.8')
+    # 定义节点属性,round4表示矩形方框
+    leafNode = dict(boxstyle='round4', fc='0.8')
+    numLeafs = getNumLeafs(myTree)
+    depth = getTreeDepth(myTree)
+    firstStr = next(iter(myTree))
+    cntrPt = (plotTree.xOff + (1 + float(numLeafs))/2/plotTree.totalW, plotTree.yOff )
+    plotMidText(cntrPt, parentPt, nodeTxt)
+    plotNode(firstStr, cntrPt, parentPt, decisionNode)
+    secondDict = myTree[firstStr]
+    plotTree.yOff = plotTree.yOff - 1/plotTree.totalD
+    for key in secondDict.keys():
+        if type(secondDict[key]).__name__=='dict':
+            plotTree(secondDict[key], cntrPt, str(key))
+        else:
+            plotTree.xOff = plotTree.xOff+ 1/plotTree.totalW
+            plotNode(secondDict[key], (plotTree.xOff, plotTree.yOff), cntrPt, leafNode)
+            plotMidText((plotTree.xOff, plotTree.yOff), cntrPt, str(key))
+    plotTree.yOff = plotTree.yOff + 1/plotTree.totalD
+
+
 
 
 # 创建绘制面板
@@ -183,7 +212,17 @@ def plotTree(myTree, parentPt, nodeTxt):
 
 
 def createPlot(inTree):
-    pass
+    fig = plt.figure(1, facecolor='white')
+    fig.clf()
+    plt.rcParams['font.sans-serif'] = ['Microsoft Yahei']
+    axprops = dict(xticks=[], yticks=[])
+    createPlot.ax1 = plt.subplot(111, frameon=False, **axprops)
+    plotTree.totalW = float(getNumLeafs(inTree))
+    plotTree.totalD = float(getTreeDepth(inTree))
+    plotTree.xOff = -0.5/plotTree.totalW
+    plotTree.yOff = 1
+    plotTree(inTree, (0.5, 1), '')
+    plt.show()
 
 
 '''
@@ -205,7 +244,13 @@ def classify(inputTree, featLabels, testVec):
     return classLabel
 
 
+def storeTree(myTree, filename):
+    with open(filename, 'wb') as fw:
+        pickle.dump(myTree, fw)
 
+def grabTree(filename):
+    fr = open(filename, 'rb')
+    return pickle.load(fr)
 
 
 if __name__ == "__main__":
@@ -221,3 +266,9 @@ if __name__ == "__main__":
     testVec = [1,0]
     result = classify(myTree, featLabels, testVec)
     print(result)
+    print(majorityCnt(labels))
+    filename = "决策树.txt"
+    storeTree(myTree, filename)
+    loadTree = grabTree(filename)
+    print(loadTree)
+    createPlot(myTree)
