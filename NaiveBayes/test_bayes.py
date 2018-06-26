@@ -52,7 +52,7 @@ Returns:
 '''
 def trainNB0(trainMatrix, trainCategory):
     numTrainDocs = len(trainMatrix)     # 計算訓練文檔的數目
-    numWords = len(trainMatrix[0])      #計算每個文檔的詞條數
+    numWords = len(trainMatrix[0])      #計算每個文檔的詞條數(不重复词条)
     pAbusive = sum(trainCategory)/float(numTrainDocs)   # 文檔屬於侮辱類的概率
     p0Num = np.ones(numWords)
     p1Num = np.ones(numWords)
@@ -96,6 +96,7 @@ def testingNB():
     for postinDoc in postingList:
         trainMat.append(setOfWords2Vec(myVocabList, postinDoc))
     p0V, p1V, pAb = trainNB0(np.array(trainMat), np.array(classVec))
+
     testEntry = ['love', 'my', 'dalmation']
     thisDoc = np.array(setOfWords2Vec(myVocabList, testEntry))
     if classifyNB(thisDoc, p0V, p1V, pAb):
@@ -109,6 +110,7 @@ def testingNB():
         print(testEntry, '屬於侮辱性詞彙')
     else:
         print(testEntry, '屬於非侮辱性詞彙')
+
 
 
 if __name__ == '__main__':
